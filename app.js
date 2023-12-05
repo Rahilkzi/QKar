@@ -23,18 +23,13 @@ const protectTrunkEndpoint = (req, res, next) => {
 
 // Create endpoint to insert data
 async function Insert(req, res) {
-  // app.get('/insert', (req, res) => {
-  const { name, phone, vahicalNO } = req.query;
+  const { name, phone, vahicalNO } = await req.body;
   if (!name || !phone || !vahicalNO || isNaN(phone)) {
     return res.status(400).json({
       error:
         'Invalid input. Name, phone, and vahicalNO are required parameters.',
     });
   }
-  // if (!name || !phone || !vahicalNO) {
-  //   return res.status(400).json({ error: 'Name and phone are required parameters.' });
-  // }
-
   db.run(
     'INSERT INTO users (name, phone, vahicalNO) VALUES (?, ?, ?)',
     [name, phone, vahicalNO],
@@ -57,32 +52,26 @@ async function GetUsers(req, res) {
   });
 }
 
-// Create endpoint to query data for a specific user with ID
-// app.use('/getbyID/:id', protectTrunkEndpoint);
-async function GetByID(req, res) {
-  const userId = req.params.id; // Specify the user ID you want to retrieve
-  db.all('SELECT * FROM users WHERE id = ?', [userId], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
-}
-
-// Create endpoint to query data for a specific user with vahicalNO
-
-async function GetByVno(req, res) {
-  const vahicalNO = req.params.vahicalNO; // Specify the user ID you want to retrieve
-  db.all(
-    'SELECT * FROM users WHERE vahicalNO = ?',
-    [vahicalNO],
-    (err, rows) => {
+// Create endpoint to query data for a specific user with  ID or vahicalNO
+async function GetInfo(req, res) {
+  const param = req.params.id;
+  const tyPe = req.params.type;
+  if (tyPe.includes('id')) {
+    // Query data for a specific user with ID
+    db.all('SELECT * FROM users WHERE id = ?', [param], (err, rows) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
       res.json(rows);
-    }
-  );
+    });
+  } else if (tyPe.includes('Vno')) {
+    db.all('SELECT * FROM users WHERE vahicalNO = ?', [param], (err, rows) => {
+      if (err) {
+        return res.status(500).json({ error: err.message });
+      }
+      res.json(rows);
+    });
+  }
 }
 
 // Create endpoint to delete data
@@ -120,4 +109,10 @@ process.on('SIGINT', () => {
   });
 });
 
-module.exports = { Insert, GetUsers, GetByID, GetByVno, DeleteByID, Trunk };
+module.exports = {
+  Insert,
+  GetUsers,
+  DeleteByID,
+  Trunk,
+  GetInfo,
+};

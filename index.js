@@ -7,7 +7,6 @@ const port = 5000;
 // Middleware to parse JSON
 app.use(express.json());
 
-
 app.use(express.urlencoded({ extended: true }));
 app.use('/', routes);
 

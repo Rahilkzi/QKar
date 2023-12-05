@@ -1,37 +1,37 @@
 const fetch = require('node-fetch');
 const fs = require('fs');
 
-
-const FindAPI1 = 'http://localhost:5000/getbyID/';
-const FindAPI2 = 'http://localhost:5000/getbyVNo/';
-let qrCodeImage = '';
+const FindAPI = 'http://localhost:5000/get/';
 
 async function create(req, res) {
-  const name = req.query.name;
-  const phone = req.query.phone;
-  const vehicalNo = req.query.vehicalNo;
-
+  const { name, phone, vehicalNo } = req.query;
   const apiUrl = 'http://localhost:5000/insert';
-  const data = {
-    name: name,
-    phone: phone,
-    vahicalNO: vehicalNo,
-  };
-
-  const queryString = new URLSearchParams(data).toString();
-  const fullUrl = `${apiUrl}?${queryString}`;
-  console.log(fullUrl);
-
   try {
-    const response = await fetch(FindAPI2 + vehicalNo);
-    const data = await response.json();
-    if (response.ok) {
-      if (vehicalNo === undefined) {
-        res.sendFile(__dirname + '/pages/index.html');
-      } else {
-        await fetch(fullUrl);
+    if (name || phone || vehicalNo) {
+      const postResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          vahicalNO: vehicalNo,
+        }),
+      });
+      res.sendFile(__dirname + '/pages/index.html');
+
+      // Check if the POST request was successful
+      if (postResponse.ok) {
+        // Handle success, e.g., redirect or send a response
         res.redirect('/qr/' + vehicalNo);
+      } else {
+        // Handle the error in the POST request
+        console.error('POST request failed:', postResponse.status);
+        // console.error('Response text:', await postResponse.text());
       }
+    } else {
+      res.sendFile(__dirname + '/pages/index.html');
     }
   } catch (error) {
     console.error('Fetch error:', error.message);
@@ -39,33 +39,30 @@ async function create(req, res) {
 }
 
 async function generateQR(req, res) {
+  let qrCodeImage = '';
   const vahicalId = req.params.vahicalid;
   try {
-    const response = await fetch(FindAPI2 + vahicalId,);
+    const response = await fetch(FindAPI + 'Vno/' + vahicalId);
     const data = await response.json();
-    // console.log(response);
-    let id = data[0].id;
     if (response.ok) {
-      qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-        'http://localhost:5000/find/' + id
-      )}`;
-      let a = data[0].vahicalNO;
-
-      if (a === vahicalId) {
+      const id = data[0]?.id;
+      const foundVehicleNo = data[0]?.vahicalNO;
+      if (foundVehicleNo === vahicalId) {
         qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
           'http://localhost:5000/find/' + id
         )}`;
+        res.writeHead(200, { 'Content-Type': 'text/html' });
+        const indexContent = fs.readFileSync('pages/QR.html', 'utf8');
+        // Replace [QR_CODE_DATA_URL] with the actual data URL
+        const updatedIndexContent = indexContent.replace(
+          '[QR_CODE_DATA_URL]',
+          qrCodeImage
+        );
+        res.end(updatedIndexContent);
+      } else {
+        res.status(404).send('Not Found');
       }
     }
-
-    res.writeHead(200, { 'Content-Type': 'text/html' });
-    const indexContent = fs.readFileSync('pages/QR.html', 'utf8');
-    // Replace [QR_CODE_DATA_URL] with the actual data URL
-    const updatedIndexContent = indexContent.replace(
-      '[QR_CODE_DATA_URL]',
-      qrCodeImage
-    );
-    res.end(updatedIndexContent);
   } catch (error) {
     // Handle errors
     console.error('Fetch error:', error.message);
@@ -73,11 +70,22 @@ async function generateQR(req, res) {
   }
 }
 
+async function Test(req, res) {
+  const userId = 'Vno/' + req.params.id;
+  console.log(userId);
+  a = FindAPI + userId;
+  console.log(a);
+  const response = await fetch(FindAPI + userId);
+  // console.log(response);
+  const data = await response.json();
+  console.log(data);
+}
+
 async function findUser(req, res) {
   const userId = req.params.id;
   const lastDValue = req.query.lastD;
   try {
-    const response = await fetch(FindAPI1 + userId, {
+    const response = await fetch(FindAPI + 'id/' + userId, {
       method: 'get',
       headers: {
         'Content-Type': 'application/json',
@@ -113,4 +121,4 @@ async function findUser(req, res) {
   }
 }
 
-module.exports = { create, generateQR, findUser };
+module.exports = { create, generateQR, findUser, Test };
