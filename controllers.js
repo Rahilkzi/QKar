@@ -4,40 +4,35 @@ const fs = require('fs');
 const FindAPI = 'http://localhost:5000/get/';
 
 // Define route for the initial HTML page
-  
+
 async function create(req, res) {
   res.sendFile(__dirname + '/pages/index.html');
-};
-
+}
 
 async function submit(req, res) {
   const { name, phone, vehicalNo } = req.body;
   const apiUrl = 'http://localhost:5000/insert';
   try {
-    if (name || phone || vehicalNo) {
-      const postResponse = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name,
-          phone: phone,
-          vahicalNO: vehicalNo,
-        }),
-      });
+    const postResponse = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: name,
+        phone: phone,
+        vahicalNO: vehicalNo,
+      }),
+    });
 
-      // Check if the POST request was successful
-      if (postResponse.ok) {
-        // Handle success, e.g., redirect or send a response
-        res.redirect('/qr/' + vehicalNo);
-      } else {
-        // Handle the error in the POST request
-        console.error('POST request failed:', postResponse.status);
-        // console.error('Response text:', await postResponse.text());
-      }
+    // Check if the POST request was successful
+    if (postResponse.ok) {
+      // Handle success, e.g., redirect or send a response
+      res.redirect('/qr/' + vehicalNo);
     } else {
-      res.sendFile(__dirname + '/pages/index.html');
+      // Handle the error in the POST request
+      console.error('POST request failed:', postResponse.status);
+      // console.error('Response text:', await postResponse.text());
     }
   } catch (error) {
     console.error('Fetch error:', error.message);
