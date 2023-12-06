@@ -5,6 +5,7 @@ const app = require('./app');
 
 router.get('/', controller.create);
 router.get('/create', controller.create);
+router.post('/submit', controller.submit);
 router.get('/qr/:vahicalid', controller.generateQR);
 router.get('/find/:id', controller.findUser);
 router.get('/test/:id', controller.Test);

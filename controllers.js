@@ -3,8 +3,15 @@ const fs = require('fs');
 
 const FindAPI = 'http://localhost:5000/get/';
 
+// Define route for the initial HTML page
+  
 async function create(req, res) {
-  const { name, phone, vehicalNo } = req.query;
+  res.sendFile(__dirname + '/pages/index.html');
+};
+
+
+async function submit(req, res) {
+  const { name, phone, vehicalNo } = req.body;
   const apiUrl = 'http://localhost:5000/insert';
   try {
     if (name || phone || vehicalNo) {
@@ -19,7 +26,6 @@ async function create(req, res) {
           vahicalNO: vehicalNo,
         }),
       });
-      res.sendFile(__dirname + '/pages/index.html');
 
       // Check if the POST request was successful
       if (postResponse.ok) {
@@ -121,4 +127,4 @@ async function findUser(req, res) {
   }
 }
 
-module.exports = { create, generateQR, findUser, Test };
+module.exports = { create, generateQR, findUser, Test, submit };
