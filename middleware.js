@@ -1,9 +1,7 @@
-
-
 // Middleware to protect /trunk endpoint
 const protectEndpoint = (req, res, next) => {
   // Check for a custom header (you can modify this based on your authentication/authorization mechanism)
-  const apiKey = req.headers['x-api-key'];
+  const apiKey = req.query['apikey'];
 
   // Add your security logic here
   if (apiKey === 'your_secret_key') {
@@ -15,7 +13,6 @@ const protectEndpoint = (req, res, next) => {
   }
 };
 
-
 module.exports = {
-  protectEndpoint
+  protectEndpoint,
 };
