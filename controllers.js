@@ -52,11 +52,11 @@ async function generateQR(req, res) {
     const response = await fetch(FindAPI + 'Vno/' + vahicalId);
     const data = await response.json();
     if (response.ok) {
-      const id = data[0]?.id;
+      const hash = data[0]?.hash;
       const foundVehicleNo = data[0]?.vahicalNO;
       if (foundVehicleNo === vahicalId) {
         qrCodeImage = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(
-          'http://localhost:5000/find/' + id
+          'http://localhost:5000/find/' + hash
         )}`;
         res.writeHead(200, { 'Content-Type': 'text/html' });
         const indexContent = fs.readFileSync('pages/QR.html', 'utf8');
@@ -88,10 +88,10 @@ async function Test(req, res) {
 }
 
 async function findUser(req, res) {
-  const userId = req.params.id;
+  const hashedkey = req.params.hash;
   const lastDValue = req.query.lastD;
   try {
-    const response = await fetch(FindAPI + 'id/' + userId, {
+    const response = await fetch(FindAPI + 'hash/' + hashedkey, {
       method: 'get',
       headers: {
         'Content-Type': 'application/json',
