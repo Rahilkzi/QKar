@@ -20,5 +20,11 @@
 
       <button onclick="sub()" type="submit">Submit</button>
     </form>
+    <div id="errorMessage">e</div>
+  <script>
+    // Use JavaScript to display the error message
+    var error = window.location.search.replace('?error=', ''); // Extract error from query parameter
+    document.getElementById('errorMessage').innerText = decodeURIComponent(error);
+  </script>
   </body>
 </html>

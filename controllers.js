@@ -13,26 +13,32 @@ async function submit(req, res) {
   const { name, phone, vehicalNo } = req.body;
   const apiUrl = 'http://localhost:5000/insert';
   try {
-    const postResponse = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        name: name,
-        phone: phone,
-        vahicalNO: vehicalNo,
-      }),
-    });
-
-    // Check if the POST request was successful
-    if (postResponse.ok) {
-      // Handle success, e.g., redirect or send a response
-      res.redirect('/qr/' + vehicalNo);
+    const response = await fetch(FindAPI + 'Vno/' + vehicalNo);
+    const data = await response.json();
+    if (data[0]) {
+      res.redirect(`/create?error=${encodeURIComponent('Already Registered')}`);
     } else {
-      // Handle the error in the POST request
-      console.error('POST request failed:', postResponse.status);
-      // console.error('Response text:', await postResponse.text());
+      const postResponse = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: name,
+          phone: phone,
+          vahicalNO: vehicalNo,
+        }),
+      });
+
+      // Check if the POST request was successful
+      if (postResponse.ok) {
+        // Handle success, e.g., redirect or send a response
+        res.redirect('/qr/' + vehicalNo);
+      } else {
+        // Handle the error in the POST request
+        console.error('POST request failed:', postResponse.status);
+        // console.error('Response text:', await postResponse.text());
+      }
     }
   } catch (error) {
     console.error('Fetch error:', error.message);
@@ -72,14 +78,13 @@ async function generateQR(req, res) {
 }
 
 async function Test(req, res) {
-  const userId = 'Vno/' + req.params.id;
-  console.log(userId);
-  a = FindAPI + userId;
-  console.log(a);
-  const response = await fetch(FindAPI + userId);
-  // console.log(response);
+  const vahicalId = req.params.id;
+  const response = await fetch(FindAPI + 'Vno/' + vahicalId);
   const data = await response.json();
-  console.log(data);
+  exist = data[0].vahicalNO;
+  if (exist) {
+    console.log(data);
+  }
 }
 
 async function findUser(req, res) {
