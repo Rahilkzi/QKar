@@ -62,18 +62,18 @@ async function GetUsers(req, res) {
 
 // Create endpoint to query data for a specific user with  ID or vahicalNO
 async function GetInfo(req, res) {
-  const param = req.params.id;
+  const Param = req.params.Param;
   const tyPe = req.params.type;
-  if (tyPe.includes('id')) {
+  if (tyPe.includes('hash')) {
     // Query data for a specific user with ID
-    db.all('SELECT * FROM users WHERE id = ?', [param], (err, rows) => {
+    db.all('SELECT * FROM users WHERE hash = ?', [Param], (err, rows) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
       res.json(rows);
     });
   } else if (tyPe.includes('Vno')) {
-    db.all('SELECT * FROM users WHERE vahicalNO = ?', [param], (err, rows) => {
+    db.all('SELECT * FROM users WHERE vahicalNO = ?', [Param], (err, rows) => {
       if (err) {
         return res.status(500).json({ error: err.message });
       }
