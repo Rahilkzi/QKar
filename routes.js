@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const controller = require('./controllers');
 const app = require('./app');
+const middleware = require('./middleware');
+
+router.use('/se', middleware.protectEndpoint);
 
 router.get('/', controller.create);
 router.get('/create', controller.create);
