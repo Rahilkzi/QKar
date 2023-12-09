@@ -1,10 +1,11 @@
 const sqlite3 = require('sqlite3').verbose();
+const crypto = require('crypto');
 const db = new sqlite3.Database('database.db');
 
 // Create a table (if not exists)
-db.run(
-  'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, phone INTEGER, vahicalNO TEXT)'
-);
+// db.run(
+//   'CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, phone INTEGER, vahicalNO TEXT, hash TEXT)'
+// );
 
 // Middleware to protect /trunk endpoint
 const protectTrunkEndpoint = (req, res, next) => {
@@ -21,9 +22,16 @@ const protectTrunkEndpoint = (req, res, next) => {
   }
 };
 
+// Function to hash the password with the salt
+function hashPassword(name, phone, vahicalNO) {
+  combine = name + phone + vahicalNO;
+  return crypto.createHash('sha256').update(combine).digest('hex');
+}
+
 // Create endpoint to insert data
 async function Insert(req, res) {
   const { name, phone, vahicalNO } = await req.body;
+  const hashedKey = hashPassword(name, phone, vahicalNO);
   if (!name || !phone || !vahicalNO || isNaN(phone)) {
     return res.status(400).json({
       error:
@@ -31,8 +39,8 @@ async function Insert(req, res) {
     });
   }
   db.run(
-    'INSERT INTO users (name, phone, vahicalNO) VALUES (?, ?, ?)',
-    [name, phone, vahicalNO],
+    'INSERT INTO users (name, phone, vahicalNO, hash) VALUES (?, ?, ?, ?)',
+    [name, phone, vahicalNO, hashedKey],
     (err) => {
       if (err) {
         return res.status(500).json({ error: err.message });
